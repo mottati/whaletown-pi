@@ -1,0 +1,51 @@
+version: "3.7"
+services:
+  agent:
+    image: portainer/agent:2.20.1
+    environment:
+      # REQUIRED: Should be equal to the service name prefixed by "tasks." when
+      # deployed inside an overlay network
+      AGENT_CLUSTER_ADDR: tasks.agent
+      # AGENT_PORT: 9001
+      # LOG_LEVEL: debug
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - local
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+
+  portainer:
+    image:  portainer/portainer-ce:2.20.1
+    # encrypted password, see https://portainer.readthedocs.io/en/stable/configuration.html#admin-password
+    # Replace is required to avoid: " You may need to escape any $ with another $."
+    command: -H tcp://tasks.agent:9001 --tlsskipverify --admin-password='$$2y$$05$$LieV6ZkDUVSCkz75nm83ROty8mWfuAkYF/D92PzjVq7/QLhBhYXOW'
+    ports:
+      - target: 9000
+        published: 9000
+        protocol: tcp
+        mode: host
+    volumes:
+    - portainer_data:/data
+    networks:
+    - local
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+      - traefik.enable=true
+      - traefik.docker.network=local
+      - traefik.http.routers.portainer.middlewares=strip-prefix
+      - traefik.http.services.portainer.loadbalancer.server.port=9000       
+
+networks:
+   local:
+        # Note: external networks are expected to exist prior to bringing this configuration up.
+        # Use: docker network create  -d overlay --attachable local
+        external: True
+
+volumes:
+    portainer_data:

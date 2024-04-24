@@ -1,0 +1,51 @@
+version: "3.7"
+services:
+
+  traefik:
+      image: traefik:2.11.0
+      command:
+          - --api.insecure=true
+          - --providers.docker.swarmMode=true
+          - --providers.docker.exposedbydefault=false
+          - '--providers.docker.defaultrule=PathPrefix(`/{{ .Name | trimPrefix (index .Labels "com.docker.stack.namespace") | trimPrefix "_" | trimPrefix "-" }}`)'
+          - --entrypoints.web.address=:80
+          - --providers.file.directory=/config
+          - --providers.file.watch=true
+          # Uncomment portions of the following section if you require detailed logging.
+          # - --log.level=DEBUG
+          # - --log.format=json
+          # - --accesslog.filepath=/logs/access.log
+          # - --log.filepath=/logs/traefik.log
+      deploy:
+          labels:
+              # routes for traefik itself
+              - traefik.enable=true
+              - traefik.http.services.traefik.loadbalancer.server.port=8080
+              # Strip Prefix Chain
+              - traefik.http.middlewares.strip-prefix-1.redirectregex.regex=^(https?://[^/]+/[\w-]+)$$
+              - traefik.http.middlewares.strip-prefix-1.redirectregex.replacement=$${1}/
+              - traefik.http.middlewares.strip-prefix-1.redirectregex.permanent=true
+              - traefik.http.middlewares.strip-prefix-2.stripprefixregex.regex=/[\w-]+
+              - traefik.http.middlewares.strip-prefix.chain.middlewares=strip-prefix-1,strip-prefix-2
+              - traefik.http.routers.traefik.middlewares=strip-prefix
+
+      ports:
+          - target: 80
+            published: 80
+            protocol: tcp
+            mode: host
+          - target: 8080
+            published: 8199
+            protocol: tcp
+            mode: host
+      volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+
+      networks:
+          - local
+
+networks:
+   local:
+        # Note: external networks are expected to exist prior to bringing this configuration up.
+        # Use: docker network create  -d overlay --attachable local
+        external: True
