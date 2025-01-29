@@ -14,7 +14,7 @@ services:
     environment:
       TZ: 'America/Los_Angeles'
       # PIEHOLE_PTR: whaletown-pi
-      FTLCONF_LOCAL_IPV4: 192.168.1.4
+      FTLCONF_LOCAL_IPV4: 10.0.0.2
       # WEBPASSWORD: 'set a secure password here or it will be random'
     # Volumes store your data between container upgrades
     volumes:
