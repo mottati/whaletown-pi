@@ -2,12 +2,12 @@ version: "3.7"
 services:
 
   traefik:
-      image: traefik:v2.11.18
+      image: traefik:v3.3
       command:
           - --api.insecure=true
-          - --providers.docker.swarmMode=true
-          - --providers.docker.exposedbydefault=false
-          - '--providers.docker.defaultrule=PathPrefix(`/{{ .Name | trimPrefix (index .Labels "com.docker.stack.namespace") | trimPrefix "_" | trimPrefix "-" }}`)'
+          - --providers.swarm=true
+          - --providers.swarm.exposedbydefault=false
+          # - '--providers.swarm.defaultrule=PathPrefix(`/{{ .Name | trimPrefix (index .Labels "com.docker.stack.namespace") | trimPrefix "_" | trimPrefix "-" }}`)'
           - --entrypoints.web.address=:80
           - --providers.file.directory=/config
           - --providers.file.watch=true
@@ -48,4 +48,4 @@ networks:
    local:
         # Note: external networks are expected to exist prior to bringing this configuration up.
         # Use: docker network create  -d overlay --attachable local
-        external: True
+        external: true

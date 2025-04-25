@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   agent:
-    image: portainer/agent:2.26.1
+    image: portainer/agent:2.29.2
     environment:
       # REQUIRED: Should be equal to the service name prefixed by "tasks." when
       # deployed inside an overlay network
@@ -19,7 +19,7 @@ services:
         constraints: [node.platform.os == linux]
 
   portainer:
-    image:  portainer/portainer-ce:2.26.1
+    image:  portainer/portainer-ce:2.29.2
     # encrypted password, see https://portainer.readthedocs.io/en/stable/configuration.html#admin-password
     # Replace is required to avoid: " You may need to escape any $ with another $."
     command: -H tcp://tasks.agent:9001 --tlsskipverify --admin-password='$$2y$$05$$LieV6ZkDUVSCkz75nm83ROty8mWfuAkYF/D92PzjVq7/QLhBhYXOW'
@@ -38,8 +38,8 @@ services:
       labels:
       - traefik.enable=true
       - traefik.docker.network=local
-      - traefik.http.routers.portainer.middlewares=strip-prefix
-      - traefik.http.services.portainer.loadbalancer.server.port=9000       
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      - "traefik.http.routers.router.rule=Host(`portainer`) || Host(`portainer.local`) || Host(`portainer.internal`)" 
 
 networks:
    local:
