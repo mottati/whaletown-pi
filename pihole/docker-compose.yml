@@ -21,7 +21,8 @@ services:
       # Set the appropriate timezone for your location from
       # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones, e.g:
       TZ: 'America/Los_Angeles'
-      FTLCONF_LOCAL_IPV4: ${FTLCONF_LOCAL_IPV4}
+      FTLCONF_dns_reply_host_force4: "true"
+      FTLCONF_dns_reply_host_IPv4: ${FTLCONF_dns_reply_host_IPv4}
       # Set a password to access the web interface. Not setting one will result in a random password being assigned
       FTLCONF_webserver_api_password: ${WEBSERVER_PASSWORD}
       # If using Docker's default `bridge` network setting the dns listening mode should be set to 'all'
@@ -29,7 +30,6 @@ services:
     # Volumes store your data between container upgrades
     volumes:
       - 'etc-pihole:/etc/pihole'
-      - 'etc-dnsmasq_d:/etc/dnsmasq.d'
     deploy:
       labels:
       - traefik.enable=true
@@ -44,7 +44,6 @@ services:
 
 volumes:
   etc-pihole:
-  etc-dnsmasq_d:
 
 networks:
   #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
