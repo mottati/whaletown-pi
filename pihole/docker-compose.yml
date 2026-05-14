@@ -4,7 +4,7 @@ version: "3"
 services:
   # Use the default service rule to route to the /admin context path
   pihole:
-    image: pihole/pihole:2025.04.0
+    image: pihole/pihole:2026.05.0
     # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
     ports:
       - target: 53
