@@ -1,0 +1,50 @@
+services:
+  whaletown:
+    image: hugomods/hugo:debian-exts-non-root-0.154.5
+    command: server
+#    ports:
+#      - '1313:1313'
+    volumes:
+      - 'src:/src'
+    deploy:
+      labels:
+      - traefik.enable=true
+      - traefik.docker.network=local
+      - traefik.http.services.whaletown.loadbalancer.server.port=1313
+      - "traefik.http.routers.whaletown.rule=Host(`whaletown`)"
+    secrets:
+      - source: id_rsa
+        target: /home/hugo/.ssh/id_rsa
+        uid: "1000"
+        gid: "1000"
+        mode: 0400  # Restrict permissions for SSH security
+    configs:
+      - source: known_hosts
+        target: /home/hugo/.ssh/known_hosts
+        uid: "1000"
+        gid: "1000"
+        mode: 0600
+      - source: id_rsa.pub
+        target: /home/hugo/.ssh/id_rsa.pub
+        uid: "1000"
+        gid: "1000"
+        mode: 0600 
+    networks:
+      - local
+
+secrets:
+  id_rsa:
+    external: true
+
+configs:
+  known_hosts:
+    external: true
+  id_rsa.pub:
+    external: true
+
+volumes:
+  src:
+
+networks:
+  local:
+    external: true
